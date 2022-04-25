@@ -8,7 +8,7 @@ class Gobang():
         self.board = [[0 for _ in range(15)] for _ in range(15)]
         self.player = '○'
         self.player_color = '白'
-        self.count = 0
+        self.count = 1
     
     def turn_change(self):
         if self.player == '○':
@@ -24,9 +24,30 @@ class Gobang():
             return True
         else:
             return False
-    
-    def stone_judgement():
-        pass
+
+    def _count_color_stone(self, yi, xi, before_stone):
+        stone = self.board[yi][xi]
+        if stone == 0:
+            self.count = 1
+        elif stone == before_stone:
+            self.count += 1
+        else:
+            self.count = 1
+
+    def stone_judgement(self, y, x):
+        # 横方向の判定
+        for xi in range(15):
+            if xi == 0:
+                before_stone = 0
+            else:
+                before_stone = self.board[y][xi-1]
+            
+            self._count_color_stone(y, xi, before_stone)
+
+            if self.count == 5:
+                stones_coordinates = [(y, xj) for xj in range(xi, xi-5, -1)]
+                return stones_coordinates
+
             
 def create_layout():
     layout = [[sg.Push(), sg.Text('白のターン', font=(None, 10), key='-TURN-')]]
@@ -52,8 +73,17 @@ def main():
             continue
         
         window[event].update(game.player)
+        winner = game.player_color
         game.turn_change()
         window['-TURN-'].update(f'{game.player_color}のターン')
+
+        stones_coordinates = game.stone_judgement(y, x)
+        if stones_coordinates:
+            for key_y, key_x in stones_coordinates:
+                key = str(key_y) + ',' + str(key_x)
+                window[key].update(button_color='red')
+            sg.popup(f'{winner}の勝利！', no_titlebar=True, grab_anywhere=True)
+            break
 
 if __name__ == '__main__':
     main()
