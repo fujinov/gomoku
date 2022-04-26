@@ -5,10 +5,10 @@ sg.theme('DarkBrown7')
 
 class Gobang():
     def __init__(self):
-        self.board = [[0 for _ in range(15)] for _ in range(15)]
+        self._board = [[0 for _ in range(15)] for _ in range(15)]
+        self._count = 1
         self.player = '○'
         self.player_color = '白'
-        self.count = 1
     
     def turn_change(self):
         if self.player == '○':
@@ -19,20 +19,20 @@ class Gobang():
             self.player_color = '白'
             
     def set_stone(self, y, x):
-        if self.board[y][x] == 0:
-            self.board[y][x] = self.player
+        if self._board[y][x] == 0:
+            self._board[y][x] = self.player
             return True
         else:
             return False
 
     def _count_color_stone(self, yi, xi, before_stone):
-        stone = self.board[yi][xi]
+        stone = self._board[yi][xi]
         if stone == 0:
-            self.count = 1
+            self._count = 1
         elif stone == before_stone:
-            self.count += 1
+            self._count += 1
         else:
-            self.count = 1
+            self._count = 1
 
     def stone_judgement(self, y, x):
         # 横方向の判定
@@ -40,14 +40,27 @@ class Gobang():
             if xi == 0:
                 before_stone = 0
             else:
-                before_stone = self.board[y][xi-1]
+                before_stone = self._board[y][xi-1]
             
             self._count_color_stone(y, xi, before_stone)
 
-            if self.count == 5:
+            if self._count == 5:
                 stones_coordinates = [(y, xj) for xj in range(xi, xi-5, -1)]
                 return stones_coordinates
 
+        # 縦方向の判定
+        self._count = 1
+        for yi in range(15):
+            if yi == 0:
+                before_stone = 0
+            else:
+                before_stone = self._board[yi-1][x]
+
+            self._count_color_stone(yi, x, before_stone)
+            
+            if self._count == 5:
+                stone_coordinates = [(yj, x) for yj in range(yi, yi-5, -1)]
+                return stone_coordinates
             
 def create_layout():
     layout = [[sg.Push(), sg.Text('白のターン', font=(None, 10), key='-TURN-')]]
