@@ -130,6 +130,7 @@ def main():
     game = Gobang()
     layout = create_layout()
     window = sg.Window('五目並べ', layout)
+    restart = 'No'
     while True:
         event, _ = window.read()
         if event == sg.WINDOW_CLOSED:
@@ -150,8 +151,12 @@ def main():
             for key_y, key_x in stones_coordinates:
                 key = str(key_y) + ',' + str(key_x)
                 window[key].update(button_color='red')
-            sg.popup(f'{winner}の勝利！', no_titlebar=True, grab_anywhere=True)
+            restart = sg.popup_yes_no(f'{winner}の勝利！\nリスタートしますか？', no_titlebar=True, grab_anywhere=True)
             break
+
+    window.close()
+    if restart == 'Yes':
+        main()
 
 if __name__ == '__main__':
     main()
